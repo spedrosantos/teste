@@ -128,10 +128,12 @@ h1 {
   font-size: 15px;
 }
 
-.btn-principal:hover,
-.btn-secundario:hover {
-  transform: translate(-1px, -1px);
-  box-shadow: 6px 6px 0 var(--tinta);
+@media (hover: hover) {
+  .btn-principal:hover,
+  .btn-secundario:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 6px 6px 0 var(--tinta);
+  }
 }
 
 .btn-principal:active,
@@ -205,10 +207,12 @@ h1 {
   transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
 }
 
-.alternativa:hover {
-  background: var(--amarelo);
-  transform: translate(-2px, -2px);
-  box-shadow: 4px 4px 0 var(--tinta);
+@media (hover: hover) {
+  .alternativa:hover {
+    background: var(--amarelo);
+    transform: translate(-2px, -2px);
+    box-shadow: 4px 4px 0 var(--tinta);
+  }
 }
 
 .letra {
