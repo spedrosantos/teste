@@ -308,63 +308,90 @@ const perguntas = [
 ];
 
 
+/* =========================
+   RESULTADOS
+========================= */
+
+const resultados = {
+    desenvolvimento: { titulo: "Desenvolvimento", icone: "💻", descricao: "Você gosta de colocar a mão na massa, entender problemas e transformar ideias em algo que realmente funciona.", superpoder: "Transformar problemas complicados em algo que finalmente funciona." },
+    frontend: { titulo: "Front-end / UX", icone: "🎨", descricao: "Você tende a pensar bastante na experiência e em como transformar uma ideia em algo interessante e fácil de usar.", superpoder: "Fazer uma ideia funcionar e ainda deixar tudo mais interessante de usar." },
+    bancoDados: { titulo: "Banco de Dados", icone: "🗄️", descricao: "Você gosta de organização, estrutura e de entender exatamente como as informações se encaixam.", superpoder: "Encontrar ordem no meio da bagunça." },
+    qa: { titulo: "QA / Testes", icone: "🔍", descricao: "Você tem tendência a questionar, testar possibilidades e perceber problemas que outras pessoas podem deixar passar.", superpoder: "Encontrar aquilo que todo mundo jurava que estava funcionando." },
+    dados: { titulo: "Dados / BI", icone: "📊", descricao: "Você gosta de entender o que está por trás das coisas antes de tirar uma conclusão.", superpoder: "Encontrar padrões onde outras pessoas só enxergam números." },
+    devops: { titulo: "DevOps / Infra", icone: "⚙️", descricao: "Você tende a valorizar estabilidade, organização e soluções que continuem funcionando mesmo quando as coisas mudam.", superpoder: "Fazer tudo continuar funcionando quando começa a dar problema." },
+    produto: { titulo: "Produto / Projetos", icone: "🚀", descricao: "Você naturalmente pensa em prioridades, pessoas e no caminho necessário para fazer uma ideia sair do papel.", superpoder: "Fazer pessoas e ideias caminharem na mesma direção." },
+    seguranca: { titulo: "Segurança", icone: "🔐", descricao: "Você tende a analisar riscos antes de confiar completamente em uma solução.", superpoder: "Perceber o problema antes de ele virar problema." },
+    suporte: { titulo: "Suporte", icone: "💬", descricao: "Você tem facilidade para lidar com pessoas, entender problemas e encontrar uma maneira de tornar as coisas mais simples.", superpoder: "Transformar 'não faço ideia do que está acontecendo' em 'agora entendi'." }
+};
+
+/* =========================
+   FLUXO DO QUIZ
+========================= */
+
+const btnVoltar = document.getElementById("btnVoltar");
+const btnCompartilhar = document.getElementById("btnCompartilhar");
+const rankingElement = document.getElementById("resultadoRanking");
+
+const historico = []; // alternativas já escolhidas (permite voltar)
+let resultadoTexto = "";
+
+function embaralhar(lista) {
+    const copia = [...lista];
+    for (let i = copia.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copia[i], copia[j]] = [copia[j], copia[i]];
+    }
+    return copia;
+}
+
+function trocarTela(tela) {
+    [telaInicial, telaQuiz, telaResultado].forEach(t => t.classList.add("escondida"));
+    tela.classList.remove("escondida");
+}
 
 btnComecar.addEventListener("click", () => {
-    telaInicial.classList.add("escondida");
-    telaQuiz.classList.remove("escondida");
-
+    trocarTela(telaQuiz);
     mostrarPergunta();
 });
 
+btnVoltar.addEventListener("click", voltar);
+btnReiniciar.addEventListener("click", reiniciar);
+btnCompartilhar.addEventListener("click", compartilhar);
 
 function mostrarPergunta() {
-
     const pergunta = perguntas[perguntaAtual];
+    const percentual = Math.round(((perguntaAtual + 1) / perguntas.length) * 100);
 
-    numeroPergunta.textContent =
-        `PERGUNTA ${perguntaAtual + 1} DE ${perguntas.length}`;
-
-    const percentual =
-        Math.round(((perguntaAtual + 1) / perguntas.length) * 100);
-
+    numeroPergunta.textContent = `Pergunta ${perguntaAtual + 1} de ${perguntas.length}`;
     porcentagem.textContent = `${percentual}%`;
-
     progresso.style.width = `${percentual}%`;
-
     perguntaElement.textContent = pergunta.pergunta;
+    btnVoltar.hidden = perguntaAtual === 0;
 
     alternativasElement.innerHTML = "";
 
-    pergunta.alternativas.forEach((alternativa, index) => {
-
+    // Ordem aleatória das alternativas evita viés pela posição
+    embaralhar(pergunta.alternativas).forEach((alternativa, index) => {
         const botao = document.createElement("button");
-
+        botao.type = "button";
         botao.classList.add("alternativa");
 
         const letra = document.createElement("span");
-
         letra.classList.add("letra");
-
         letra.textContent = String.fromCharCode(65 + index);
 
         const texto = document.createElement("span");
-
         texto.textContent = alternativa.texto;
 
-        botao.appendChild(letra);
-        botao.appendChild(texto);
-
-        botao.addEventListener("click", () => {
-            responder(alternativa);
-        });
-
+        botao.append(letra, texto);
+        botao.addEventListener("click", () => responder(alternativa));
         alternativasElement.appendChild(botao);
     });
 }
 
 function responder(alternativa) {
+    historico.push(alternativa);
 
-    // Soma os pontos da área de TI
     for (const area in alternativa.pontos) {
         pontuacao[area] += alternativa.pontos[area];
     }
@@ -378,120 +405,85 @@ function responder(alternativa) {
     }
 }
 
+function voltar() {
+    if (perguntaAtual === 0) return;
+
+    const anterior = historico.pop();
+    for (const area in anterior.pontos) {
+        pontuacao[area] -= anterior.pontos[area];
+    }
+
+    perguntaAtual--;
+    mostrarPergunta();
+}
+
+function reiniciar() {
+    perguntaAtual = 0;
+    historico.length = 0;
+    for (const area in pontuacao) pontuacao[area] = 0;
+
+    trocarTela(telaQuiz);
+    mostrarPergunta();
+}
 
 function mostrarResultado() {
+    trocarTela(telaResultado);
 
-    telaQuiz.classList.add("escondida");
-    telaResultado.classList.remove("escondida");
+    // Embaralha antes de ordenar: empates deixam de favorecer sempre a mesma área
+    const ranking = embaralhar(Object.entries(pontuacao)).sort((a, b) => b[1] - a[1]);
 
-    // Ordena as áreas da maior pontuação para a menor
-    const ranking = Object.entries(pontuacao)
-        .sort((a, b) => b[1] - a[1]);
+    const [primeiro, segundo] = [resultados[ranking[0][0]], resultados[ranking[1][0]]];
 
-    // Primeira e segunda colocadas
-    const primeiroLugar = ranking[0][0];
-    const segundoLugar = ranking[1][0];
+    document.getElementById("resultadoIcone").textContent = primeiro.icone;
+    document.getElementById("resultadoTitulo").textContent = primeiro.titulo;
+    document.getElementById("resultadoDescricao").textContent = primeiro.descricao;
+    document.getElementById("resultadoSecundario").textContent = segundo.titulo;
+    document.getElementById("resultadoSuperpoder").textContent = primeiro.superpoder;
 
-    const resultados = {
-        desenvolvimento: {
-            titulo: "Desenvolvimento",
-            icone: "💻",
-            descricao: "Você gosta de colocar a mão na massa, entender problemas e transformar ideias em algo que realmente funciona.",
-            superpoder: "Transformar problemas complicados em algo que finalmente funciona."
-        },
+    // Afinidade das 3 primeiras áreas, proporcional à mais pontuada
+    const maior = ranking[0][1] || 1;
+    rankingElement.innerHTML = "";
 
-        frontend: {
-            titulo: "Front-end / UX",
-            icone: "🎨",
-            descricao: "Você tende a pensar bastante na experiência e em como transformar uma ideia em algo interessante e fácil de usar.",
-            superpoder: "Fazer uma ideia funcionar e ainda deixar tudo mais interessante de usar."
-        },
+    ranking.slice(0, 3).forEach(([area, pontos]) => {
+        const pct = Math.round((pontos / maior) * 100);
 
-        bancoDados: {
-            titulo: "Banco de Dados",
-            icone: "🗄️",
-            descricao: "Você gosta de organização, estrutura e de entender exatamente como as informações se encaixam.",
-            superpoder: "Encontrar ordem no meio da bagunça."
-        },
+        const linha = document.createElement("div");
+        linha.classList.add("rank-linha");
 
-        qa: {
-            titulo: "QA / Testes",
-            icone: "🔍",
-            descricao: "Você tem tendência a questionar, testar possibilidades e perceber problemas que outras pessoas podem deixar passar.",
-            superpoder: "Encontrar aquilo que todo mundo jurava que estava funcionando."
-        },
+        const nome = document.createElement("span");
+        nome.textContent = `${resultados[area].icone} ${resultados[area].titulo}`;
 
-        dados: {
-            titulo: "Dados / BI",
-            icone: "📊",
-            descricao: "Você gosta de entender o que está por trás das coisas antes de tirar uma conclusão.",
-            superpoder: "Encontrar padrões onde outras pessoas só enxergam números."
-        },
+        const valor = document.createElement("span");
+        valor.textContent = `${pct}%`;
 
-        devops: {
-            titulo: "DevOps / Infra",
-            icone: "⚙️",
-            descricao: "Você tende a valorizar estabilidade, organização e soluções que continuem funcionando mesmo quando as coisas mudam.",
-            superpoder: "Fazer tudo continuar funcionando quando começa a dar problema."
-        },
+        const trilho = document.createElement("div");
+        trilho.classList.add("rank-trilho");
+        const preenchimento = document.createElement("div");
+        preenchimento.style.width = `${pct}%`;
+        trilho.appendChild(preenchimento);
 
-        produto: {
-            titulo: "Produto / Projetos",
-            icone: "🚀",
-            descricao: "Você naturalmente pensa em prioridades, pessoas e no caminho necessário para fazer uma ideia sair do papel.",
-            superpoder: "Fazer pessoas e ideias caminharem na mesma direção."
-        },
-
-        seguranca: {
-            titulo: "Segurança",
-            icone: "🔐",
-            descricao: "Você tende a analisar riscos antes de confiar completamente em uma solução.",
-            superpoder: "Perceber o problema antes de ele virar problema."
-        },
-
-        suporte: {
-            titulo: "Suporte",
-            icone: "💬",
-            descricao: "Você tem facilidade para lidar com pessoas, entender problemas e encontrar uma maneira de tornar as coisas mais simples.",
-            superpoder: "Transformar 'não faço ideia do que está acontecendo' em 'agora entendi'."
-        }
-    };
-
-    const resultadoPrincipal = resultados[primeiroLugar];
-    const resultadoSecundario = resultados[segundoLugar];
-
-    // Resultado principal
-    document.getElementById("resultadoIcone").textContent =
-        resultadoPrincipal.icone;
-
-    document.getElementById("resultadoTitulo").textContent =
-        resultadoPrincipal.titulo;
-
-    document.getElementById("resultadoDescricao").textContent =
-        resultadoPrincipal.descricao;
-
-    // Segundo resultado
-    document.getElementById("resultadoSecundario").textContent =
-        resultadoSecundario.titulo;
-
-    document.getElementById("resultadoSuperpoder").textContent =
-        resultadoPrincipal.superpoder;
-    const btnNovamente = document.getElementById("btnNovamente");
-
-    btnReiniciar.addEventListener("click", () => {
-        // Volta para a primeira pergunta
-        perguntaAtual = 0;
-
-        // Zera a pontuação
-        for (const area in pontuacao) {
-            pontuacao[area] = 0;
-        }
-
-        // Volta para o quiz
-        telaResultado.classList.add("escondida");
-        telaQuiz.classList.remove("escondida");
-
-        // Mostra a primeira pergunta
-        mostrarPergunta();
+        linha.append(nome, valor, trilho);
+        rankingElement.appendChild(linha);
     });
+
+    resultadoTexto = `Meu perfil de TI é ${primeiro.titulo} ${primeiro.icone}! Descubra o seu:`;
+    btnCompartilhar.textContent = "Compartilhar resultado";
+}
+
+async function compartilhar() {
+    const url = location.href;
+
+    if (navigator.share) {
+        try {
+            await navigator.share({ text: resultadoTexto, url });
+        } catch (e) { /* usuário cancelou */ }
+        return;
+    }
+
+    try {
+        await navigator.clipboard.writeText(`${resultadoTexto} ${url}`);
+        btnCompartilhar.textContent = "Copiado!";
+    } catch (e) {
+        btnCompartilhar.textContent = "Não foi possível copiar";
+    }
 }
