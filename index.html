@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Qual área de TI combina com você?</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <main class="app">
+
+        <!-- TELA INICIAL -->
+        <section id="telaInicial" class="tela">
+
+            <div class="icone">💻</div>
+
+            <p class="tag">TESTE DE PERSONALIDADE</p>
+
+            <h1>
+                Qual área de TI
+                <span>combina com você?</span>
+            </h1>
+
+            <p class="descricao">
+                Responda algumas perguntas e descubra
+                qual área da tecnologia mais combina
+                com o seu jeito de pensar.
+            </p>
+
+            <button id="btnComecar" class="btn-principal">
+                Começar o teste →
+            </button>
+
+            <p class="observacao">
+                Não existem respostas certas ou erradas.
+            </p>
+
+        </section>
+
+
+        <!-- TELA DO QUIZ -->
+        <section id="telaQuiz" class="tela escondida">
+
+            <div class="topo-quiz">
+
+                <span id="contador">
+                    Pergunta 1 de 12
+                </span>
+
+                <span id="porcentagem">
+                    8%
+                </span>
+
+            </div>
+
+            <div class="barra">
+                <div id="progresso"></div>
+            </div>
+
+
+            <div class="pergunta-area">
+
+                <p class="numero-pergunta">
+                    PERGUNTA
+                </p>
+
+                <h2 id="pergunta">
+                    Pergunta aqui
+                </h2>
+
+                <div id="alternativas"></div>
+
+            </div>
+
+        </section>
+
+
+        <!-- TELA DE RESULTADO -->
+        <section id="telaResultado" class="tela escondida">
+
+            <p class="tag">ANÁLISE CONCLUÍDA</p>
+
+            <div class="resultado-icone" id="resultadoIcone">
+                💻
+            </div>
+
+            <p class="resultado-label">
+                SEU PERFIL DE TI
+            </p>
+
+            <h1 id="resultadoTitulo">
+                Desenvolvimento
+            </h1>
+
+            <p id="resultadoDescricao" class="descricao">
+                Resultado...
+            </p>
+
+            <div class="resultado-secundario">
+
+                <span>Você também combina com:</span>
+
+                <strong id="resultadoSecundario">
+                    Front-end / UX
+                </strong>
+
+            </div>
+
+            <div class="superpoder">
+
+                <span>⚡ Seu superpoder</span>
+
+                <p id="resultadoSuperpoder">
+                    ...
+                </p>
+
+            </div>
+
+            <button id="btnReiniciar" class="btn-principal">
+                Fazer novamente
+            </button>
+
+        </section>
+
+    </main>
+
+    <script src="script.js"></script>
+
+</body>
+</html>
